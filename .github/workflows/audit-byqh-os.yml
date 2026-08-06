@@ -1,0 +1,79 @@
+name: By_qh OS - Final Project Auditor & Integrity Check
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  audit-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 1. Check File Structure & Connectivity
+        run: |
+          echo "========================================================="
+          echo " BY_QH OS AUDITOR: KIỂM TRA TÍNH LIỀN MẠCH CỦA DỰ ÁN "
+          echo "========================================================="
+          
+          ERROR_COUNT=0
+          
+          echo "[1] Kiểm tra sự tồn tại của các file cấu hình (.mk)..."
+          FILES=(
+            "vendor/custom/config/debloat/debloat_packages.mk"
+            "vendor/custom/config/gaming/extreme_gaming_boost.mk"
+            "vendor/custom/config/power/battery_saver_props.mk"
+            "vendor/custom/config/gaming/animation_props.mk"
+            "vendor/custom/config/network/extreme_network_boost.mk"
+            "vendor/custom/config/network/doh_props.mk"
+            "vendor/custom/config/privacy/privacy_vault.mk"
+            "vendor/custom/config/core/eas_scheduler.mk"
+            "vendor/custom/config/core/ufs_io_boost.mk"
+            "vendor/custom/config/core/multitask_ram.mk"
+            "vendor/custom/config/media/dolby_audio_vip.mk"
+            "vendor/custom/config/media/audiofx_vip.mk"
+            "vendor/custom/config/media/camera_ai_vip.mk"
+            "vendor/custom/config/ui/ui_customizations.mk"
+            "vendor/custom/config/gestures/smart_gestures.mk"
+            "vendor/custom/config/ota/ota_config.mk"
+            "vendor/custom/config/build/final_build_prep.mk"
+          )
+          
+          for FILE in "${FILES[@]}"; do
+            if [ ! -f "$FILE" ]; then
+              echo "❌ LỖI: Thiếu file $FILE"
+              ERROR_COUNT=$((ERROR_COUNT+1))
+            else
+              echo "✔️ OK: $FILE"
+            fi
+          done
+
+          echo ""
+          echo "[2] Kiểm tra xem device.mk đã liên kết (inherit) hết các module chưa..."
+          if grep -q "debloat_packages.mk" device/generic/common/device.mk && \
+             grep -q "extreme_gaming_boost.mk" device/generic/common/device.mk && \
+             grep -q "eas_scheduler.mk" device/generic/common/device.mk && \
+             grep -q "dolby_audio_vip.mk" device/generic/common/device.mk; then
+             echo "✔️ OK: device.mk đã liên kết các module chính."
+          else
+             echo "❌ LỖI: device.mk thiếu lệnh inherit-product!"
+             ERROR_COUNT=$((ERROR_COUNT+1))
+          fi
+
+          echo ""
+          echo "[3] Kiểm tra trùng lặp thuộc tính (Duplicate Properties)..."
+          if grep -rio "ro.byqh.version=.*" device/generic/common/device.mk | sort | uniq -d | grep -q "ro.byqh"; then
+             echo "❌ CẢNH BÁO: Phát hiện thuộc tính ro.byqh bị trùng lặp!"
+             ERROR_COUNT=$((ERROR_COUNT+1))
+          else
+             echo "✔️ OK: Không có xung đột thuộc tính By_qh."
+          fi
+
+          echo "========================================================="
+          if [ $ERROR_COUNT -eq 0 ]; then
+            echo " 🎉 TỔNG KẾT: DỰ ÁN HOÀN HẢO! 100% LIỀN MẠCH, SẴN SÀNG BUILD! "
+          else
+            echo " ⚠️ TỔNG KẾT: Phát hiện $ERROR_COUNT lỗi. Vui lòng kiểm tra lại! "
+          fi
+          echo "========================================================="
+          exit $ERROR_COUNT
