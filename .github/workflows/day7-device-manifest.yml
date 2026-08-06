@@ -1,0 +1,35 @@
+name: Day 7 - Fetch Device Manifest
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fetch-device-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Google Repo Tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git python3 curl
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+
+      - name: Generate Local Manifest for Target Device
+        run: |
+          git config --global user.name "hao874148-lang"
+          git config --global user.email "lhao874148@gmail.com"
+          mkdir -p ~/android-source && cd ~/android-source
+          ~/bin/repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --depth=1
+
+          mkdir -p .repo/local_manifests
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > .repo/local_manifests/target_device.xml
+          echo '<manifest>' >> .repo/local_manifests/target_device.xml
+          echo '  <project path="device/generic/common" name="LineageOS/android_device_generic_common" remote="github" revision="lineage-21.0" />' >> .repo/local_manifests/target_device.xml
+          echo '</manifest>' >> .repo/local_manifests/target_device.xml
+
+          echo "=== ĐÃ TẠO LOCAL MANIFEST THIẾT BỊ MẪU ==="
+          cat .repo/local_manifests/target_device.xml
