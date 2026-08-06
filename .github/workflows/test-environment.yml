@@ -1,0 +1,22 @@
+name: Cloud Build Specs Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  check-hardware:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Display System Hardware
+        run: |
+          echo "=== CPU INFO ==="
+          lscpu | grep "Model name\|CPU(s):"
+          echo "=== MEMORY INFO ==="
+          free -h
+          echo "=== DISK SPACE ==="
+          df -h /
