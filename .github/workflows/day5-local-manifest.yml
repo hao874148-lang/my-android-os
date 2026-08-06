@@ -10,8 +10,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Google Repo Tool
+      - name: Install Git LFS & Google Repo Tool
         run: |
+          sudo apt-get update
+          sudo apt-get install -y git-lfs python3 curl
+          git lfs install
           mkdir -p ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
@@ -21,19 +24,16 @@ jobs:
           git config --global user.name "hao874148-lang"
           git config --global user.email "lhao874148@gmail.com"
           mkdir -p ~/android-source && cd ~/android-source
-          ~/bin/repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --git-lfs --depth=1
+          ~/bin/repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --depth=1
 
-          # Tạo thư mục local_manifests
           mkdir -p .repo/local_manifests
 
-          # Tạo file XML cấu hình thiết bị tùy chỉnh mẫu
-          cat << 'XML' > .repo/local_manifests/my_device.xml
+          cat << 'XML_DATA' > .repo/local_manifests/my_device.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-  <!-- Đây là nơi bạn khai báo mã nguồn Device Tree, Vendor và Kernel sau này -->
-  <!-- Ví dụ cấu hình tham chiếu -->
+  <!-- Cau hinh device tree va vendor blobs se duoc them tai day -->
 </manifest>
-XML
+XML_DATA
 
           echo "=== KẾT QUẢ TẠO LOCAL MANIFESTS ==="
           ls -la .repo/local_manifests/
