@@ -10,31 +10,27 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Git LFS & Google Repo Tool
+      - name: Install Google Repo Tool
         run: |
           sudo apt-get update
-          sudo apt-get install -y git-lfs python3 curl
-          git lfs install
+          sudo apt-get install -y git python3 curl
           mkdir -p ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
 
-      - name: Init Repo & Create Local Manifest Structure
+      - name: Init Repo & Create Local Manifest
         run: |
           git config --global user.name "hao874148-lang"
           git config --global user.email "lhao874148@gmail.com"
           mkdir -p ~/android-source && cd ~/android-source
           ~/bin/repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --depth=1
-
+          
           mkdir -p .repo/local_manifests
-
-          cat << 'XML_DATA' > .repo/local_manifests/my_device.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest>
-  <!-- Cau hinh device tree va vendor blobs se duoc them tai day -->
-</manifest>
-XML_DATA
-
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > .repo/local_manifests/my_device.xml
+          echo '<manifest>' >> .repo/local_manifests/my_device.xml
+          echo '  <!-- Local manifest config -->' >> .repo/local_manifests/my_device.xml
+          echo '</manifest>' >> .repo/local_manifests/my_device.xml
+          
           echo "=== KẾT QUẢ TẠO LOCAL MANIFESTS ==="
           ls -la .repo/local_manifests/
           cat .repo/local_manifests/my_device.xml
