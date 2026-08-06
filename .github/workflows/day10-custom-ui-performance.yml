@@ -1,0 +1,71 @@
+name: Day 10 - Integrate Game Space Quick Tile & Performance Profiles
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  integrate-custom-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Add Game Mode Quick Settings Tile in SystemUI
+        run: |
+          mkdir -p vendor/custom/overlay/systemui/res/values
+          cat << 'XML' > vendor/custom/overlay/systemui/res/values/config_systemui_gamespace.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <!-- Thêm Game Mode Quick Tile vào danh sách Tile mặc định trên Control Center -->
+              <string name="quick_settings_tiles_default" translatable="false">
+                  wifi,bt,dnd,flashlight,rotation,battery,location,gamespace
+              </string>
+              
+              <!-- Bật chế độ ưu tiên độ nhạy cảm ứng cho Game Space -->
+              <bool name="config_game_touch_boost_enabled">true</bool>
+          </resources>
+          XML
+          echo "=== ĐÃ TẠO CONFIG SYSTEMUI QUICK TILE ==="
+
+      - name: Configure CPU/GPU Thermal & Performance Profiles
+        run: |
+          mkdir -p vendor/custom/config/power
+          cat << 'XML' > vendor/custom/config/power/powerhint_gamespace.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <powerhint>
+              <!-- Cấu hình khi kích hoạt Game Mode (PROFILE_GAME) -->
+              <profile name="game">
+                  <!-- Ép xung CPU Governor sang mode Performance -->
+                  <property name="scaling_governor" value="performance" />
+                  <!-- Khóa tốc độ quét màn hình cao nhất -->
+                  <property name="ro.surface_flinger.set_idle_timer_ms" value="0" />
+                  <property name="ro.surface_flinger.set_touch_timer_ms" value="0" />
+                  <!-- Mở rộng băng thông RAM & GPU -->
+                  <property name="vendor.gpu.boost" value="1" />
+              </profile>
+          </powerhint>
+          XML
+          echo "=== ĐÃ CẤU HÌNH POWER HINT VÀ ÉP XUNG GAME MODE ==="
+
+      - name: Update Global Custom OS Build Configuration
+        run: |
+          mkdir -p device/generic/common
+          cat << 'MAKEFILE' >> device/generic/common/device.mk
+
+          # Game Space Control Center Overlay & Performance Profile
+          PRODUCT_PACKAGES += \
+              PowerHintGameSpace \
+              GameSpaceTileOverlay
+
+          # Set properties cho Render Đồ Họa & Cảm Ứng siêu nhạy
+          PRODUCT_PROPERTY_OVERRIDES += \
+              persist.sys.game.perf_mode=1 \
+              touch.pressure.scale=0.001 \
+              ro.hardware.egl=adreno \
+              debug.sf.latch_unsignaled=1
+          MAKEFILE
+
+          echo "=== CẬP NHẬT DEVICE MAKEFILE CHO NGÀY 10 THÀNH CÔNG ==="
+          tail -n 15 device/generic/common/device.mk
