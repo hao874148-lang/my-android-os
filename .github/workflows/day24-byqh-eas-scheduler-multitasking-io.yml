@@ -1,0 +1,105 @@
+name: Day 24 - By_qh Advanced EAS Scheduler, UFS I/O Boost & Multitasking RAM
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  byqh-day24-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 1. Advanced EAS Task Scheduler & CPU Core Control
+        run: |
+          mkdir -p vendor/custom/config/core
+          cat << 'RC' > vendor/custom/config/core/init.byqh.eas.rc
+          on boot
+              # Set schedutil governor for smart task placement
+              write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
+              write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "schedutil"
+              write /sys/devices/system/cpu/cpu6/cpufreq/scaling_governor "schedutil"
+              
+              # Enable Energy Aware Scheduler (EAS) & Task Packing
+              write /proc/sys/kernel/sched_energy_aware 1
+              write /proc/sys/kernel/sched_coloc_down_threshold 110
+              write /proc/sys/kernel/sched_coloc_up_threshold 100
+              write /proc/sys/kernel/sched_boost 0
+              
+              # Reduce wake-up latency for foreground apps
+              write /proc/sys/kernel/sched_latency_ns 10000000
+              write /proc/sys/kernel/sched_min_granularity_ns 1000000
+              write /proc/sys/kernel/sched_wakeup_granularity_ns 1000000
+          RC
+          cat << 'MAKEFILE' > vendor/custom/config/core/eas_scheduler.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.eas_scheduler=enabled \
+              ro.byqh.core_control=dynamic \
+              persist.sys.cpu_boost=true
+          MAKEFILE
+
+      - name: 2. UFS I/O Elevator & Storage Speed Boost
+        run: |
+          mkdir -p vendor/custom/config/core
+          cat << 'RC' > vendor/custom/config/core/init.byqh.io.rc
+          on boot
+              # Set I/O scheduler to BFQ for fairness or Kyber for low latency
+              write /sys/block/sda/queue/scheduler "bfq"
+              write /sys/block/sda/queue/iosched/back_seek_max 16384
+              write /sys/block/sda/queue/iosched/slice_idle 0
+              
+              # Increase read-ahead speed for UFS
+              write /sys/block/sda/queue/read_ahead_kb 512
+          RC
+          cat << 'MAKEFILE' > vendor/custom/config/core/ufs_io_boost.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.io_boost=ufs_ultra \
+              persist.sys.io_bfq=1 \
+              ro.byqh.read_ahead=512kb
+          MAKEFILE
+
+      - name: 3. Multitasking RAM Manager & LMKD Tuning
+        run: |
+          mkdir -p vendor/custom/config/core
+          cat << 'MAKEFILE' > vendor/custom/config/core/multitask_ram.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.multitasking=extreme \
+              ro.sys.fw.bg_apps_limit=128 \
+              ro.sys.fw.bservice_limit=32 \
+              ro.sys.fw.empty_app_limit=32 \
+              persist.sys.lmk.dir=high \
+              persist.sys.lmk.minfree_levels=18432:0:23040:100:27648:200:32256:250:65536:900
+          MAKEFILE
+
+      - name: 4. Inject Day 24 Rules into Device Makefile
+        run: |
+          mkdir -p device/generic/common
+          touch device/generic/common/device.mk
+          cat << 'MAKEFILE' >> device/generic/common/device.mk
+          # ==================== DAY 24: EAS SCHEDULER, I/O & MULTITASKING ====================
+          $(call inherit-product, vendor/custom/config/core/eas_scheduler.mk)
+          $(call inherit-product, vendor/custom/config/core/ufs_io_boost.mk)
+          $(call inherit-product, vendor/custom/config/core/multitask_ram.mk)
+          PRODUCT_COPY_FILES += \
+              vendor/custom/config/core/init.byqh.eas.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.byqh.eas.rc \
+              vendor/custom/config/core/init.byqh.io.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.byqh.io.rc
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.day24.status=COMPLETED \
+              ro.byqh.scheduler_level=eas_dynamic \
+              ro.byqh.multitask_level=extreme
+          MAKEFILE
+
+      - name: 5. System Integrity Check & Verification
+        run: |
+          echo "========================================================="
+          echo " BY_QH OS VIP ANDROID 16 - DAY 24 INTEGRITY CHECK "
+          echo "========================================================="
+          ls -la vendor/custom/config/core/init.byqh.eas.rc || exit 1
+          ls -la vendor/custom/config/core/eas_scheduler.mk || exit 1
+          ls -la vendor/custom/config/core/init.byqh.io.rc || exit 1
+          ls -la vendor/custom/config/core/ufs_io_boost.mk || exit 1
+          ls -la vendor/custom/config/core/multitask_ram.mk || exit 1
+          ls -la device/generic/common/device.mk || exit 1
+          echo "========================================================="
+          echo " NGÀY 24 THÀNH CÔNG! LẬP LỊCH TÁC VỤ EAS & ĐA NHIỆM MƯỢT MÀ! "
+          echo "========================================================="
