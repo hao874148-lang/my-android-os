@@ -12,7 +12,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 1. Integration By_qh OS Branding
+      - name: 1. Integrate By_qh OS Branding
         run: |
           mkdir -p vendor/custom/config
           cat << 'MAKEFILE' > vendor/custom/config/byqh_branding.mk
@@ -29,6 +29,7 @@ jobs:
               ro.product.brand=By_qh \
               ro.product.model=By_qh Gaming Phone
           MAKEFILE
+          echo "=== ĐÃ KHỞI TẠO BỘ BRANDING THƯƠNG HIỆU BY_QH OS ==="
 
       - name: 2. Set Cyberpunk Gaming Theme & OLED Black UI
         run: |
@@ -52,6 +53,7 @@ jobs:
               <integer name="config_peakRefreshRate">144</integer>
           </resources>
           XML
+          echo "=== ĐÃ TÍCH HỢP THEME BẢNG MÀU GAMING CYBERPUNK CHUẨN BY_QH ==="
 
       - name: 3. Gaming SystemUI Quick Tiles & Header
         run: |
@@ -65,12 +67,16 @@ jobs:
               <string name="status_bar_network_name" translatable="false">By_qh Gaming Core</string>
           </resources>
           XML
+          echo "=== ĐÃ TỐI ƯU SYSTEMUI QUICK TILES & TRẠM ĐIỀU KHIỂN GAMING HUD ==="
 
       - name: 4. Inject Properties to Device Makefile
         run: |
+          mkdir -p device/generic/common
+          touch device/generic/common/device.mk
+
           cat << 'MAKEFILE' >> device/generic/common/device.mk
 
-          # By_qh Gaming OS Framework Overrides
+          # ==================== BY_QH GAMING OS CORE INTEGRATION ====================
           $(call inherit-product, vendor/custom/config/byqh_branding.mk)
 
           PRODUCT_PROPERTY_OVERRIDES += \
@@ -81,3 +87,12 @@ jobs:
               debug.game.performance=1
           MAKEFILE
 
+          echo "=== ĐÃ CẬP NHẬT HOÀN TẤT MAKEFILE VỚI GIAO DIỆN BY_QH GAMING 100% ==="
+          tail -n 20 device/generic/common/device.mk
+
+      - name: 5. Verify Generated Files
+        run: |
+          ls -la vendor/custom/config/byqh_branding.mk
+          ls -la vendor/custom/overlay/frameworks/base/core/res/res/values/colors_gaming.xml
+          ls -la device/generic/common/device.mk
+          echo "=== TẤT CẢ TẬP TIN DỰ ÁN NGÀY 12 ĐÃ ĐƯỢC TẠO THÀNH CÔNG ==="
