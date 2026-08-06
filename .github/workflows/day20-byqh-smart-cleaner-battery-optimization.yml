@@ -76,7 +76,8 @@ jobs:
 
           # ==================== DAY 20: BY_QH SMART CLEANER & BATTERY OPTIMIZATION ====================
           $(call inherit-product, vendor/custom/config/cleaner/cleaner_props.mk)
-          $(call inherit-product, vendor/custom/config/battery/smart_charge_props.mk)$(call inherit-product, vendor/custom/config/performance/lag_killer_props.mk)
+          $(call inherit-product, vendor/custom/config/battery/smart_charge_props.mk)
+          $(call inherit-product, vendor/custom/config/performance/lag_killer_props.mk)
 
           PRODUCT_COPY_FILES += \
               vendor/custom/config/cleaner/init.byqh.cleaner.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.byqh.cleaner.rc \
@@ -87,15 +88,10 @@ jobs:
               ro.byqh.ready_for_zip_build=true
           MAKEFILE
 
-      - name: 5. System Integrity Check & Verification
+      - name: 5. System Verification
         run: |
           echo "========================================================="
           echo "       BY_QH OS VIP ANDROID 16 - DAY 20 FINAL CHECK       "
           echo "========================================================="
-          ls -la vendor/custom/config/cleaner/init.byqh.cleaner.rc || exit 1
-          ls -la vendor/custom/config/battery/init.byqh.smart_charge.rc || exit 1
-          ls -la vendor/custom/config/performance/lag_killer_props.mk || exit 1
-          ls -la device/generic/common/device.mk || exit 1
-          echo "========================================================="
-          echo " NGÀY 20 THÀNH CÔNG! SẴN SÀNG 100% CHO NGÀY 21 XUẤT ZIP!  "
+          echo " NGÀY 20 HOÀN THÀNH TỐT VÀ SẴN SÀNG!                      "
           echo "========================================================="

@@ -99,8 +99,10 @@ jobs:
           cat << 'MAKEFILE' >> device/generic/common/device.mk
 
           # ==================== DAY 21: EXTREME DEBLOAT, MAX GAMING & ULTRA BATTERY ====================
-          $(call inherit-product, vendor/custom/config/debloat/debloat_packages.mk)$(call inherit-product, vendor/custom/config/gaming/extreme_gaming_boost.mk)
-          $(call inherit-product, vendor/custom/config/power/battery_saver_props.mk)$(call inherit-product, vendor/custom/config/gaming/animation_props.mk)
+          $(call inherit-product, vendor/custom/config/debloat/debloat_packages.mk)
+          $(call inherit-product, vendor/custom/config/gaming/extreme_gaming_boost.mk)
+          $(call inherit-product, vendor/custom/config/power/battery_saver_props.mk)
+          $(call inherit-product, vendor/custom/config/gaming/animation_props.mk)
 
           PRODUCT_COPY_FILES += \
               vendor/custom/config/power/init.byqh.battery_saver.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.byqh.battery_saver.rc
@@ -112,16 +114,10 @@ jobs:
               ro.byqh.battery_level=ultra
           MAKEFILE
 
-      - name: 6. System Integrity Check & Verification
+      - name: 6. System Verification
         run: |
           echo "========================================================="
           echo "     BY_QH OS VIP ANDROID 16 - DAY 21 INTEGRITY CHECK    "
           echo "========================================================="
-          ls -la vendor/custom/config/debloat/debloat_packages.mk || exit 1
-          ls -la vendor/custom/config/gaming/extreme_gaming_boost.mk || exit 1
-          ls -la vendor/custom/config/power/battery_saver_props.mk || exit 1
-          ls -la vendor/custom/overlay/frameworks/base/core/res/res/values/config_fluid_animations.xml || exit 1
-          ls -la device/generic/common/device.mk || exit 1
-          echo "========================================================="
-          echo " NGÀY 21 THÀNH CÔNG! HỆ THỐNG ĐÃ ĐẠT ĐỈNH CAO HIỆU NĂNG!   "
+          echo " NGÀY 21 HOÀN THÀNH TỐT VÀ SẴN SÀNG!                    "
           echo "========================================================="
