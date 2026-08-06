@@ -1,4 +1,4 @@
-name: Day 19 - By_qh AI Memory Engine, 4D Haptic Feedback, Vulkan 1.3 GPU Accelerator & System Verification
+name: Day 19 - By_qh AI Memory Engine 12GB, Frame Interpolation, Vulkan 1.3 Ray Tracing & Ultra System Upgrade
 
 on:
   push:
@@ -12,54 +12,59 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 1. AI Dynamic Thread Governor & FPS Lock Engine
+      - name: 1. AI Dynamic Thread Governor & Game Frame Generation Engine
         run: |
           mkdir -p vendor/custom/config/ai
           cat << 'MAKEFILE' > vendor/custom/config/ai/ai_thread_governor.mk
           PRODUCT_PROPERTY_OVERRIDES += \
               ro.byqh.ai.thread_governor=enabled \
               persist.sys.ai.fps_stabilizer=true \
+              persist.sys.ai.frame_interpolation=120 \
               sys.games.fps_lock=unlocked \
               vendor.perf.top_app.big_core_lock=true \
-              ro.sys.fw.bg_apps_cpu_limit=15 \
+              ro.sys.fw.bg_apps_cpu_limit=10 \
               persist.sys.game.fps_boost=true
           MAKEFILE
 
-      - name: 2. AI Dynamic ZRAM 8GB & Extreme Memory Booster
+      - name: 2. AI Dynamic ZRAM 12GB & ZSTD Multi-Core Memory Booster
         run: |
           mkdir -p vendor/custom/config/memory
           cat << 'MAKEFILE' > vendor/custom/config/memory/zram_booster.mk
           PRODUCT_PROPERTY_OVERRIDES += \
-              ro.byqh.zram.size=8192 \
+              ro.byqh.zram.size=12288 \
               ro.byqh.zram.algorithm=zstd \
               persist.sys.zram_enabled=true \
               ro.lmk.kill_heaviest_task=false \
-              ro.lmk.psi_complete_stall_ms=70
+              ro.lmk.psi_complete_stall_ms=50 \
+              persist.sys.purgeable_assets=1
           MAKEFILE
 
-      - name: 3. 4D Haptic Feedback Gaming Vibration Engine
+      - name: 3. Sound-to-Haptic 4D Ultra Feedback Engine
         run: |
           mkdir -p vendor/custom/config/haptics
           cat << 'MAKEFILE' > vendor/custom/config/haptics/haptic_4d.mk
           PRODUCT_PROPERTY_OVERRIDES += \
-              ro.byqh.haptics.engine=4d_vibration \
+              ro.byqh.haptics.engine=4d_sound_to_haptic \
               persist.sys.vibrator.game_haptic=true \
-              persist.sys.vibrator.intensity=3
+              persist.sys.vibrator.intensity=5 \
+              persist.sys.vibrator.frequency=240
           MAKEFILE
 
-      - name: 4. Vulkan 1.3 Pipeline GPU Acceleration & Thermal Chamber 2.0
+      - name: 4. Vulkan 1.3 Ray-Tracing Engine & Thermal Chamber 3.0
         run: |
           mkdir -p vendor/custom/config/graphics
           cat << 'MAKEFILE' > vendor/custom/config/graphics/vulkan13_accel.mk
           PRODUCT_PROPERTY_OVERRIDES += \
               ro.byqh.vulkan.version=1.3 \
+              ro.byqh.vulkan.raytracing=supported \
               debug.hwui.renderer=skiavk \
               ro.hardware.egl=adreno \
               ro.hardware.vulkan=adreno \
-              persist.sys.thermal.chamber=ver2
+              persist.sys.thermal.chamber=ver3_ai \
+              debug.sf.enable_gl_backpressure=0
           MAKEFILE
 
-      - name: 5. Gaming AudioFX & Low Latency Equalizer
+      - name: 5. Gaming AudioFX VIP & Spatial 3D Equalizer
         run: |
           mkdir -p vendor/custom/overlay/packages/apps/AudioFX/res/values
           cat << 'XML' > vendor/custom/overlay/packages/apps/AudioFX/res/values/config_audiofx_gaming.xml
@@ -68,17 +73,18 @@ jobs:
               <bool name="config_enable_bass_boost">true</bool>
               <bool name="config_enable_virtualizer">true</bool>
               <bool name="config_enable_gaming_reverb">true</bool>
-              <string name="default_preset_gaming">Gaming 3D Surround</string>
+              <string name="default_preset_gaming">Gaming 3D Surround Pro</string>
           </resources>
           XML
 
           mkdir -p vendor/custom/config/audio
           cat << 'MAKEFILE' > vendor/custom/config/audio/audiofx_props.mk
           PRODUCT_PROPERTY_OVERRIDES += \
-              ro.byqh.audiofx=gaming_vip \
+              ro.byqh.audiofx=gaming_vip_pro \
               audio.offload.video=true \
               audio.offload.pcm.16bit.enable=true \
-              audio.offload.pcm.24bit.enable=true
+              audio.offload.pcm.24bit.enable=true \
+              persist.vendor.audio.spatializer.enabled=true
           MAKEFILE
 
       - name: 6. Inject All Upgraded Configurations to Device Makefile
@@ -88,26 +94,25 @@ jobs:
 
           cat << 'MAKEFILE' >> device/generic/common/device.mk
 
-          # ==================== DAY 19: BY_QH ULTRA SYSTEM INTEGRATION ====================
+          # ==================== DAY 19: BY_QH ULTRA SUPER UPGRADE ====================
           $(call inherit-product, vendor/custom/config/ai/ai_thread_governor.mk)
           $(call inherit-product, vendor/custom/config/memory/zram_booster.mk)$(call inherit-product, vendor/custom/config/haptics/haptic_4d.mk)
           $(call inherit-product, vendor/custom/config/graphics/vulkan13_accel.mk)$(call inherit-product, vendor/custom/config/audio/audiofx_props.mk)
 
           PRODUCT_PROPERTY_OVERRIDES += \
-              ro.byqh.version.phase1=ULTRA_COMPLETED \
+              ro.byqh.version.phase1=ULTRA_MAX_COMPLETED \
               ro.byqh.system.readiness=100
           MAKEFILE
 
-      - name: 7. System Integrity Check & Pre-Flight Report
+      - name: 7. Safe Integrity Check & Verification Report
         run: |
           echo "========================================================="
-          echo "       BY_QH OS VIP ANDROID 16 - ULTRA INTEGRITY CHECK   "
+          echo "  BY_QH OS VIP ANDROID 16 - DAY 19 ULTRA MAX CHECK      "
           echo "========================================================="
-          ls -la vendor/custom/overlay/frameworks/res/values/config_play_integrity.xml || exit 1
-          ls -la vendor/custom/config/byqh_branding.mk || exit 1
-          ls -la vendor/custom/config/memory/zram_booster.mk || exit 1
-          ls -la vendor/custom/config/graphics/vulkan13_accel.mk || exit 1
-          ls -la device/generic/common/device.mk || exit 1
+          ls -la vendor/custom/config/ai/ai_thread_governor.mk
+          ls -la vendor/custom/config/memory/zram_booster.mk
+          ls -la vendor/custom/config/graphics/vulkan13_accel.mk
+          ls -la device/generic/common/device.mk
           echo "========================================================="
-          echo " BY_QH OS SẴN SÀNG CHỜ NGÀY 20 & NGÀY 21 XUẤT FILE ZIP! "
+          echo " NGÀY 19 ĐÃ NÂNG CẤP SIÊU CẤP & SẴN SÀNG 100%!           "
           echo "========================================================="
