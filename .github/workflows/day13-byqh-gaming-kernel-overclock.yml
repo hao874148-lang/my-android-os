@@ -1,0 +1,91 @@
+name: Day 13 - By_qh Gaming Kernel VIP Overclock & Thermal Control Integration
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  byqh-kernel-gaming-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 1. Khởi Tạo Cấu Hình VIP Kernel Gaming Tuning (init.byqh.gaming.rc)
+        run: |
+          mkdir -p vendor/custom/config/init
+          cat << 'RC' > vendor/custom/config/init/init.byqh.gaming.rc
+          # By_qh OS Gaming Kernel Tuning Script
+          on boot
+              write /sys/block/mmcblk0/queue/scheduler "bfq"
+              write /sys/block/sda/queue/scheduler "bfq"
+              write /sys/block/sda/queue/read_ahead_kb 2048
+              write /sys/block/zram0/comp_algorithm "lz4"
+              write /sys/class/input/input0/enabled 1
+              
+          on property:sys.boot_completed=1
+              write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
+              write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "performance"
+              write /sys/class/kgsl/kgsl-3d0/devfreq/governor "msm-adreno-tz"
+              write /proc/sys/net/ipv4/tcp_congestion_control "bbr"
+              write /proc/sys/net/core/default_qdisc "fq"
+          RC
+          echo "=== ĐÃ TẠO FILE TÙY CHỈNH KERNEL INIT BY_QH GAMING ==="
+
+      - name: 2. Thiết Lập Bộ Kiểm Soát Nhiệt Độ & Thermal Throttling Control
+        run: |
+          mkdir -p vendor/custom/config/thermal
+          cat << 'XML' > vendor/custom/config/thermal/thermal-engine-gaming.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <thermal_configuration>
+              <thresholds>
+                  <cpu_threshold_warning>75</cpu_threshold_warning>
+                  <cpu_threshold_critical>85</cpu_threshold_critical>
+                  <gpu_threshold_critical>90</gpu_threshold_critical>
+              </thresholds>
+          </thermal_configuration>
+          XML
+          echo "=== ĐÃ TÍCH HỢP BỘ KIỂM SOÁT NHIỆT ĐỘ GAMING THERMAL ==="
+
+      - name: 3. Tối Ưu Hóa System Properties Cho Kernel & GPU Graphics
+        run: |
+          mkdir -p vendor/custom/config
+          cat << 'MAKEFILE' > vendor/custom/config/kernel_gaming_props.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.kernel.tuning=1 \
+              ro.byqh.touch.sensitivity=100 \
+              ro.byqh.gpu.boost=1 \
+              persist.vendor.qti.games.gt.enable=true \
+              debug.egl.hw=1 \
+              debug.sf.latch_unsignaled=1 \
+              vendor.perf.gesture.status=1 \
+              persist.sys.scrollingcache=3 \
+              sys.use_fifo_ui=1
+          MAKEFILE
+          echo "=== ĐÃ KHỞI TẠO BỘ PROPERTIES TỐI ƯU KERNEL & ĐỒ HỌA ==="
+
+      - name: 4. Cập Nhật Cây Thiết Bị Device Makefile
+        run: |
+          mkdir -p device/generic/common
+          touch device/generic/common/device.mk
+
+          cat << 'MAKEFILE' >> device/generic/common/device.mk
+
+          # ==================== DAY 13: BY_QH GAMING KERNEL INTEGRATION ====================
+          $(call inherit-product, vendor/custom/config/kernel_gaming_props.mk)
+
+          PRODUCT_COPY_FILES += \
+              vendor/custom/config/init/init.byqh.gaming.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.byqh.gaming.rc \
+              vendor/custom/config/thermal/thermal-engine-gaming.xml:$(TARGET_COPY_OUT_VENDOR)/etc/thermal-engine-gaming.xml
+          MAKEFILE
+
+          echo "=== ĐÃ NỐI CẤU HÌNH NGÀY 13 VÀO DEVICE MAKEFILE ==="
+
+      - name: 5. Kiểm Tra Sự Tồn Tại Của Tất Cả Tập Tin
+        run: |
+          ls -la vendor/custom/config/init/init.byqh.gaming.rc
+          ls -la vendor/custom/config/thermal/thermal-engine-gaming.xml
+          ls -la vendor/custom/config/kernel_gaming_props.mk
+          ls -la device/generic/common/device.mk
+          echo "=== NGÀY 13: TÍCH HỢP GAMING KERNEL HOÀN THÀNH TỐT ==="
