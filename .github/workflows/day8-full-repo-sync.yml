@@ -1,0 +1,63 @@
+name: Day 8 - Full Repo Sync & Build Cache Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  full-sync-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Free Disk Space (Tối ưu hóa dung lượng ổ đĩa Cloud)
+        run: |
+          echo "=== TRƯỚC KHÍ DỌN DẸP ==="
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo apt-get clean
+          echo "=== SAU KHÍ DỌN DẸP ==="
+          df -h
+
+      - name: Install Build Toolchain & Google Repo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bisect bison build-essential cc-rs ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf lib32ncurses5-dev lib32z1-dev liblibc6-dev-i386-cross libncurses5 libncurses5-dev libreadline-dev libxml2-utils lzop pngcrush rs-sync schedtool squashfs-tools xsltproc zip zlib1g-dev python3
+          
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+
+      - name: Setup Ccache (Tích hợp bộ nhớ đệm biên dịch 10GB)
+        run: |
+          mkdir -p ~/.ccache
+          echo "export USE_CCACHE=1" >> ~/.bashrc
+          echo "export CCACHE_EXEC=/usr/bin/ccache" >> ~/.bashrc
+          ccache -M 10G
+          echo "=== CẤU HÌNH CCACHE HÀNH CÔNG ==="
+          ccache -s
+
+      - name: Full Repo Sync (Đồng bộ toàn bộ mã nguồn Android 14)
+        run: |
+          git config --global user.name "hao874148-lang"
+          git config --global user.email "lhao874148@gmail.com"
+          
+          mkdir -p ~/android-source && cd ~/android-source
+          
+          echo "=== KHỞI TẠO REPO BASE LINEAGEOS 21.0 ==="
+          ~/bin/repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --git-lfs --depth=1
+
+          # Sao chép Local Manifests từ repo GitHub sang thư mục build
+          mkdir -p .repo/local_manifests
+          if [ -d "$GITHUB_WORKSPACE/.repo/local_manifests" ]; then
+            cp -r $GITHUB_WORKSPACE/.repo/local_manifests/* .repo/local_manifests/
+          fi
+
+          echo "=== TIẾN HÀNH SYNC MÃ NGUỒN TOÀN PHẦN (OPTIMIZED FAST SYNC) ==="
+          ~/bin/repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+
+          echo "=== DUNG LƯỢNG MÃ NGUỒN SAU KHÍ SYNC ==="
+          du -sh ~/android-source
