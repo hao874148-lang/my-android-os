@@ -1,0 +1,83 @@
+name: Day 12 - By_qh Custom Branding & 100% Gaming UI/UX System Transformation
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  byqh-gaming-transform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 1. Integration By_qh OS Branding
+        run: |
+          mkdir -p vendor/custom/config
+          cat << 'MAKEFILE' > vendor/custom/config/byqh_branding.mk
+          PRODUCT_NAME := By_qh OS Gaming Edition
+          PRODUCT_BRAND := By_qh
+          PRODUCT_MANUFACTURER := By_qh Studio
+          PRODUCT_MODEL := By_qh VIP Android 16 Gaming
+          
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.version=VIP-A16-GAMING-V1.0 \
+              ro.byqh.developer=hao874148-lang \
+              ro.byqh.edition=By_qh-Gaming-Core \
+              ro.build.display.id=By_qh OS v1.0 (Android 16 Gaming Core) \
+              ro.product.brand=By_qh \
+              ro.product.model=By_qh Gaming Phone
+          MAKEFILE
+
+      - name: 2. Set Cyberpunk Gaming Theme & OLED Black UI
+        run: |
+          mkdir -p vendor/custom/overlay/frameworks/base/core/res/res/values
+          cat << 'XML' > vendor/custom/overlay/frameworks/base/core/res/res/values/colors_gaming.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="primary_dark">#0D0E15</color>
+              <color name="accent_device_default_dark">#00FF66</color>
+              <color name="accent_device_default_light">#00E5FF</color>
+              <color name="background_floating_material_dark">#12141D</color>
+              <color name="system_neutral1_900">#08090C</color>
+          </resources>
+          XML
+
+          cat << 'XML' > vendor/custom/overlay/frameworks/base/core/res/res/values/config_gaming_ui.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <bool name="config_defaultNightMode">true</bool>
+              <integer name="config_defaultRefreshRate">120</integer>
+              <integer name="config_peakRefreshRate">144</integer>
+          </resources>
+          XML
+
+      - name: 3. Gaming SystemUI Quick Tiles & Header
+        run: |
+          mkdir -p vendor/custom/overlay/packages/apps/SystemUI/res/values
+          cat << 'XML' > vendor/custom/overlay/packages/apps/SystemUI/res/values/config_systemui_byqh.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="quick_settings_tiles_default" translatable="false">
+                  wifi,cell,bt,dnd,gamespace,fps_counter,performance_mode,screenshot,flashlight,rotation
+              </string>
+              <string name="status_bar_network_name" translatable="false">By_qh Gaming Core</string>
+          </resources>
+          XML
+
+      - name: 4. Inject Properties to Device Makefile
+        run: |
+          cat << 'MAKEFILE' >> device/generic/common/device.mk
+
+          # By_qh Gaming OS Framework Overrides
+          $(call inherit-product, vendor/custom/config/byqh_branding.mk)
+
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.gaming.ui=enabled \
+              ro.byqh.fps.overlay=1 \
+              ro.byqh.performance.governor=performance \
+              persist.sys.theme.dark=1 \
+              debug.game.performance=1
+          MAKEFILE
+
