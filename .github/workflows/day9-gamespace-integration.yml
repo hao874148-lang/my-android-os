@@ -1,6 +1,8 @@
 name: Day 9 - Integrate Game Space OS Framework & UI Overlay
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -10,69 +12,53 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Local Manifest for Game Space & Performance Framework
+      - name: Setup Local Manifest for Game Space
         run: |
           mkdir -p .repo/local_manifests
-          
-          # Khởi tạo manifest khai báo Game Space Module & Game Mode Service
           cat << 'XML' > .repo/local_manifests/gamespace_features.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest>
-  <!-- Game Space Overlay App Module -->
-  <project path="packages/apps/GameSpace" name="LineageOS/android_packages_apps_GameSpace" remote="github" revision="lineage-21.0" clone-depth="1" />
-  
-  <!-- System Tuning Performance Profiles -->
-  <project path="device/custom/sepolicy/gamespace" name="LineageOS/android_device_lineage_sepolicy" remote="github" revision="lineage-21.0" clone-depth="1" />
-</manifest>
-XML
-          echo "=== ĐÃ KHỞI TẠO SUCCESSFUL LOCAL MANIFEST GATESPACE ==="
+          <?xml version="1.0" encoding="UTF-8"?>
+          <manifest>
+            <!-- Game Space Overlay App Module -->
+            <project path="packages/apps/GameSpace" name="LineageOS/android_packages_apps_GameSpace" remote="github" revision="lineage-21.0" clone-depth="1" />
+          </manifest>
+          XML
+          echo "=== ĐÃ KHỞI TẠO LOCAL MANIFEST GAMESPACE ==="
           cat .repo/local_manifests/gamespace_features.xml
 
       - name: Create Custom Game Space Overlay Configuration
         run: |
           mkdir -p vendor/custom/overlay/gamespace/res/values
-          
-          # Cấu hình tính năng Game Space mặc định cho hệ thống Android OS
           cat << 'XML' > vendor/custom/overlay/gamespace/res/values/config_gamespace.xml
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Bật chế độ Game Mode mặc định trên Android OS -->
-    <bool name="config_gameModeSupported">true</bool>
-
-    # Thiết lập độ ưu tiên mặc định cho Game Dashboard OS
-    <string name="config_gamespace_default_performance_mode">performance</string>
-    <bool name="config_gamespace_show_fps_overlay">true</bool>
-    <bool name="config_gamespace_block_notifications_in_game">true</bool>
-    <bool name="config_gamespace_disable_auto_brightness_in_game">true</bool>
-</resources>
-XML
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <!-- Bật chế độ Game Mode mặc định trên Android OS -->
+              <bool name="config_gameModeSupported">true</bool>
+              <!-- Thiết lập độ ưu tiên mặc định cho Game Dashboard OS -->
+              <string name="config_gamespace_default_performance_mode">performance</string>
+              <bool name="config_gamespace_show_fps_overlay">true</bool>
+              <bool name="config_gamespace_block_notifications_in_game">true</bool>
+              <bool name="config_gamespace_disable_auto_brightness_in_game">true</bool>
+          </resources>
+          XML
           echo "=== ĐÃ TẠO CONFIG GAME SPACE OVERLAY ==="
 
-      - name: Update Target Device Build Overlay & BoardConfig
+      - name: Update Target Device Build Overlay
         run: |
           mkdir -p device/generic/common
-          
-          # Đảm bảo gói Game Space được bao gồm vào danh sách cài đặt ứng dụng hệ thống
           cat << 'MAKEFILE' >> device/generic/common/device.mk
 
-# Custom OS Game Space & Performance Overlay Integrations
-PRODUCT_PACKAGES += \
-    GameSpace \
-    GameSpaceOverlay \
-    libgamemode
+          # Custom OS Game Space & Performance Overlay Integrations
+          PRODUCT_PACKAGES += \
+              GameSpace \
+              GameSpaceOverlay \
+              libgamemode
 
-# Kích hoạt Game Mode API Services trong Android Framework
-PRODUCT_PROPERTY_OVERRIDES += \
-    debug.game.performance.fps=1 \
-    persist.sys.game.mode=1 \
-    ro.GAME_MODE_SUPPORTED=true
-MAKEFILE
+          # Kích hoạt Game Mode API Services trong Android Framework
+          PRODUCT_PROPERTY_OVERRIDES += \
+              debug.game.performance.fps=1 \
+              persist.sys.game.mode=1 \
+              ro.GAME_MODE_SUPPORTED=true
+          MAKEFILE
 
           echo "=== CẬP NHẬT DEVICE MAKEFILE THÀNH CÔNG ==="
           tail -n 15 device/generic/common/device.mk
-
-      - name: Commit & Verify Changes
-        run: |
-          git config --global user.name "hao874148-lang"
-          git config --global user.email "lhao874148@gmail.com"
-          echo "Dọn dẹp và chuẩn bị đẩy code Ngày 9 lên nhánh main"
