@@ -1,3 +1,4 @@
+
 name: Build LineageOS GSI ROM for Samsung A32
 
 on:
@@ -26,13 +27,28 @@ jobs:
         run: |
           mkdir -p output
           cd output
-          # Tự động quét API GitHub để lấy link tải bản GSI arm64 mới nhất
-          DOWNLOAD_URL=$(curl -s https://api.github.com/repos/AndyYan/LineageOS_GSI/releases | jq -r '.[].assets[].browser_download_url' | grep -i 'arm64-bvS' | head -n 1)
-          echo "Đang tải từ link: $DOWNLOAD_URL"
           
+          # Gọi API GitHub để lấy danh sách release
+          API_JSON=$(curl -s https://api.github.com/repos/AndyYan/LineageOS_GSI/releases)
+          
+          # Lọc lấy link tải xuống (dùng .[0] để lấy bản mới nhất, grep 'arm64_bvS.img.xz' để lấy đúng file)
+          DOWNLOAD_URL=$(echo "$API_JSON" | jq -r 'if type == "array" then .[0].assets[].browser_download_url else empty end' | grep 'arm64_bvS.img.xz' | head -n 1)
+          
+          # Kiểm tra nếu không tìm thấy link (tránh lỗi host name rỗng)
+          if [ -z "$DOWNLOAD_URL" ]; then
+            echo "❌ LỖI: Không tìm thấy link tải GSI. Có thể do GitHub giới hạn API (Rate limit) hoặc tên file đã đổi."
+            echo "Nội dung API trả về:"
+            echo "$API_JSON" | head -n 20
+            exit 1
+          fi
+          
+          echo "=== Đang tải từ link: $DOWNLOAD_URL ==="
           wget -O gsi_base.img.xz "$DOWNLOAD_URL"
+          
+          echo "=== Giải nén file ==="
           xz -d gsi_base.img.xz
           mv *.img system.img
+          ls -lh
 
       - name: 4. Nén thành file ROM cài đặt (.zip)
         run: |
