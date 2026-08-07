@@ -24,5 +24,6 @@ jobs:
           mkdir -p ~/android-source && cd ~/android-source
           ~/bin/repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --depth=1
 
-          echo "=== KÍCH HOẠT TIẾN TRÌNH THÁNG 2: BRING-UP PHẦN CỨNG ==="
+          echo "=== KHỞI TẠO VÀ KIỂM TRA THƯ MỤC MANIFESTS ==="
+          mkdir -p .repo/local_manifests
           ls -la .repo/local_manifests/
