@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: 1. Dọn Dẹp Dung Lượng & Cài Đặt Công Cụ Biên Dịch Cao Cấp
         run: |
@@ -34,9 +32,6 @@ jobs:
           mkdir -p ~/bin
           curl [https://storage.googleapis.com/git-repo-downloads/repo](https://storage.googleapis.com/git-repo-downloads/repo) > ~/bin/repo
           chmod a+x ~/bin/repo
-          
-          git config --global user.name "hao874148-lang"
-          git config --global user.email "lhao874148@gmail.com"
 
       - name: 2. Thiết Lập Toàn Bộ Cấu Trúc Thư Mục Dự Án
         run: |
@@ -528,15 +523,6 @@ jobs:
             echo " 🎉 TỔNG KẾT: DỰ ÁN VIP PRO MAX HOÀN HẢO! 100% LIỀN MẠCH, SẴN SÀNG BUILD! "
           else
             echo " ⚠️ TỔNG KẾT: Phát hiện $ERROR_COUNT lỗi. Vui lòng kiểm tra lại! "
+            exit 1
           fi
           echo "========================================================="
-          exit $ERROR_COUNT
-
-      - name: 10. Auto Push Mã Nguồn Lên GitHub Branch Main
-        if: always()
-        run: |
-          git config --global user.name "byqh-os-bot"
-          git config --global user.email "bot@byqh-os.com"
-          git add . || true
-          git commit -m "Upgrade VIP Pro Max: Touch 1000Hz, AI Super Res, ZRAM 16GB, Bypass Charging 2.0 & Dynamic Island" || true
-          git push origin main || echo "Git push skipped in workflow"
