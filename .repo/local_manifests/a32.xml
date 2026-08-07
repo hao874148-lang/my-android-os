@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <project path="device/samsung/a32" name="samsung-mt6768/android_device_samsung_a32" remote="github" revision="lineage-20" />
+  <project path="vendor/samsung/a32" name="samsung-mt6768/android_vendor_samsung_a32" remote="github" revision="lineage-20" />
+  <project path="kernel/samsung/a32" name="UniversalX-dev/android_kernel_samsung_a32" remote="github" revision="experimental/lineage-20" />
+</manifest>
