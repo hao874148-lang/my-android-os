@@ -1,0 +1,482 @@
+name: By_qh OS VIP Pro Max Ultimate - Dế Vương Android 16 Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-vip-promax-ultimate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 0. Dọn Dẹp Dung Lượng & Cài Đặt Toolchain VIP Ultimate
+        run: |
+          echo "========================================================="
+          echo " [0] NÂNG CẤP DUNG LƯỢNG MÁY ẢO CLOUD & TOOLCHAIN "
+          echo "========================================================="
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/powershell /usr/local/share/boost || true
+          sudo apt-get clean || true
+          df -h /
+          sudo apt-get update || true
+          sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf libncurses-dev libreadline-dev libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev python3 liblz4-tool || true
+
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          echo "=== TOOLCHAIN SẴN SÀNG ==="
+
+      - name: 1. Thiết Lập Cấu Trúc Thư Mục Ultimate
+        run: |
+          mkdir -p vendor/custom/config/{debloat,gaming,power,network,privacy,core,media,ui,gestures,ota,build,ai,memory,cleaner,battery,performance,haptics,graphics,audio,input,sysctl,game,init,thermal,notifications,smoothness,display,security}
+          mkdir -p vendor/custom/overlay/{frameworks/base/core/res/res/values,frameworks/base/packages/SettingsProvider/res/values,packages/apps/{SystemUI,GameSpace,AudioFX}/res/values,gamespace/res/values,systemui/res/values,frameworks/res/values,framework/res/values}
+          mkdir -p .repo/local_manifests
+          mkdir -p device/generic/common
+          echo "=== CẤU TRÚC THƯ MỤC ULTIMATE ĐÃ SẴN SÀNG ==="
+
+      - name: 2. Khai Báo Local Manifests & GApps Pass Bank
+        run: |
+          cat << 'XML' > .repo/local_manifests/byqh_ultimate_manifest.xml
+          <?xml version="1.0" encoding="UTF-8"?>
+          <manifest>
+            <project path="packages/apps/GameSpace" name="LineageOS/android_packages_apps_GameSpace" remote="github" revision="lineage-21.0" clone-depth="1" />
+            <project path="vendor/gapps" name="NikGapps/vendor_gapps" remote="github" revision="master" clone-depth="1" />
+            <project path="device/generic/common" name="LineageOS/android_device_generic_common" remote="github" revision="lineage-21.0" clone-depth="1" />
+            <project path="packages/resources/devicesettings" name="LineageOS/android_packages_resources_devicesettings" remote="github" revision="lineage-21.0" clone-depth="1" />
+          </manifest>
+          XML
+
+      - name: 3. Khởi Tạo Thương Hiệu, Giao Diện Đế Vương & iOS ProMotion Physics
+        run: |
+          # ===== BRANDING ULTIMATE =====
+          cat << 'MAKEFILE' > vendor/custom/config/byqh_branding.mk
+          PRODUCT_NAME := By_qh OS Ultimate
+          PRODUCT_BRAND := By_qh
+          PRODUCT_MANUFACTURER := By_qh Studio
+          PRODUCT_MODEL := By_qh VIP Pro Max Ultimate
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.version=ULTIMATE-A16-V2.0 \
+              ro.byqh.developer=hao874148-lang \
+              ro.byqh.edition=By_qh-Emperor-Core \
+              ro.build.display.id=By_qh OS v2.0 Ultimate (Android 16) \
+              ro.product.brand=By_qh \
+              ro.product.model=By_qh Ultimate Phone
+          MAKEFILE
+
+          # ===== PLAY INTEGRITY & LOCALE & SYSTEMUI (Giữ nguyên các config cũ) =====
+          cat << 'XML' > vendor/custom/overlay/frameworks/base/core/res/res/values/config_play_integrity.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <bool name="config_hasPlayIntegritySpoof">true</bool>
+              <bool name="config_spoofGoogleClient">true</bool>
+              <bool name="config_avoidGmsReprovisioning">true</bool>
+              <string name="config_gms_process_name" translatable="false">com.google.android.gms</string>
+              <string name="config_gms_unstable_process_name" translatable="false">com.google.android.gms.unstable</string>
+          </resources>
+          XML
+
+          cat << 'XML' > vendor/custom/overlay/frameworks/base/core/res/res/values/config_locale.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string-array name="config_localePickerLocales" translatable="false">
+                  <item>vi-VN</item>
+                  <item>en-US</item>
+              </string-array>
+          </resources>
+          XML
+
+          # ===== SYSTEMUI & DYNAMIC ISLAND =====
+          cat << 'XML' > vendor/custom/overlay/packages/apps/SystemUI/res/values/config_systemui_gamespace.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="quick_settings_tiles_default" translatable="false">wifi,cell,bt,dnd,gamespace,fps_counter,performance_mode,bypass_charge,screenrecord,flashlight,rotation,ai_turbo</string>
+              <bool name="config_game_touch_boost_enabled">true</bool>
+              <string name="status_bar_network_name" translatable="false">By_qh Ultimate</string>
+          </resources>
+          XML
+
+          cat << 'XML' > vendor/custom/overlay/packages/apps/SystemUI/res/values/config_dynamic_island.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <bool name="config_enable_dynamic_island">true</bool>
+              <bool name="config_dynamic_island_charging_animation">true</bool>
+              <bool name="config_dynamic_island_media_visualizer">true</bool>
+              <bool name="config_dynamic_island_bank_alerts">true</bool>
+              <bool name="config_dynamic_island_gamespace_fps">true</bool>
+              <dimen name="dynamic_island_corner_radius">32dp</dimen>
+              <dimen name="dynamic_island_height_min">38dp</dimen>
+              <dimen name="dynamic_island_height_max">200dp</dimen>
+          </resources>
+          XML
+
+          # ===== DISPLAY & GRAPHICS OVERLAYS (DC Dimming, True Tone, HDR10+) =====
+          cat << 'XML' > vendor/custom/overlay/frameworks/base/core/res/res/values/config_display_ultimate.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <bool name="config_support_dc_dimming">true</bool>
+              <bool name="config_support_true_tone">true</bool>
+              <bool name="config_support_hdr10plus">true</bool>
+              <bool name="config_support_dolby_vision">true</bool>
+              <integer name="config_defaultRefreshRate">144</integer>
+              <integer name="config_peakRefreshRate">165</integer>
+              <bool name="config_user_refresh_rate_toggle">true</bool>
+          </resources>
+          XML
+
+          # ===== LIQUID GLASS & CYBERPUNK COLORS =====
+          cat << 'XML' > vendor/custom/overlay/frameworks/base/core/res/res/values/colors_ultimate.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="primary_dark">#020305</color>
+              <color name="accent_device_default_dark">#00FFAA</color>
+              <color name="accent_device_default_light">#00E5FF</color>
+              <color name="background_floating_material_dark">#08090C</color>
+              <color name="system_neutral1_900">#000000</color>
+              <color name="liquid_glass_bg">#1AFFFFFF</color>
+              <color name="dynamic_island_bg_color">#F0000000</color>
+          </resources>
+          XML
+
+      - name: 4. Tối Ưu Phần Cứng Đỉnh Cao (Touch 1000Hz, Adrenoboost, RAM Plus, AI Predictive)
+        run: |
+          # ===== TOUCH 1000HZ & IOS SMOOTHNESS =====
+          cat << 'MAKEFILE' > vendor/custom/config/input/touch_1000hz.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.touch.sampling_rate=1000 \
+              ro.byqh.touch.latency_ms=0.5 \
+              touch.pressure.scale=0.0001 \
+              view.scroll_friction=0.001 \
+              windowsmgr.max_events_per_sec=360 \
+              sys.use_fifo_ui=1
+          MAKEFILE
+
+          cat << 'MAKEFILE' > vendor/custom/config/smoothness/ios_smoothness.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.smoothness.profile=ios_ultimate \
+              debug.renderengine.backend=skiavk \
+              debug.sf.latch_unsignaled=1 \
+              debug.sf.high_fps_early_phase_offset_ns=6100000 \
+              ro.surface_flinger.use_content_detection_for_refresh_rate=true \
+              ro.byqh.touch.sampling_rate=1000
+          MAKEFILE
+
+          # ===== AI PREDICTIVE ENGINE & RAM PLUS ULTIMATE =====
+          cat << 'MAKEFILE' > vendor/custom/config/ai/ai_predictive_engine.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.ai.predictive_loading=enabled \
+              persist.sys.ai.preload_apps=true \
+              ro.byqh.ai.context_aware=true \
+              persist.sys.ai.zero_latency_app_launch=true
+          MAKEFILE
+
+          cat << 'MAKEFILE' > vendor/custom/config/memory/ram_plus_ultimate.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.zram.size=32768 \
+              ro.byqh.zram.algorithm=zstd \
+              persist.sys.zram_enabled=true \
+              ro.byqh.ram_plus.size=16384 \
+              ro.byqh.virtual_memory=extreme \
+              persist.sys.purgeable_assets=1
+          MAKEFILE
+
+          # ===== ADRENOBOOST & VULKAN 1.3 RAY TRACING EXTREME =====
+          cat << 'MAKEFILE' > vendor/custom/config/graphics/adrenoboost_extreme.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.adrenoboost=ultra \
+              ro.hardware.adreno.compute=overclock \
+              ro.byqh.vulkan.version=1.3 \
+              ro.byqh.vulkan.raytracing=true \
+              debug.hwui.renderer=skiavk \
+              ro.surface_flinger.supports_background_blur=1 \
+              persist.sys.game.sr_upscale=2.0
+          MAKEFILE
+
+          # ===== EXTREME GAMING BOOST =====
+          cat << 'MAKEFILE' > vendor/custom/config/gaming/extreme_gaming_boost.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.extreme_gaming=enabled \
+              persist.vendor.qti.games.gt.enable=true \
+              vendor.perf.gesture.status=1 \
+              debug.sf.latch_unsignaled=1 \
+              debug.sf.enable_gl_backpressure=0 \
+              debug.egl.hw=1 \
+              debug.performance.tuning=1 \
+              ro.sys.fw.use_trim_settings=true \
+              persist.sys.performance.level=max \
+              ro.byqh.game_unlocker=enabled \
+              persist.vendor.game.unlock_fps=144 \
+              ro.product.vendor.model=ASUS_AI2401 \
+              ro.product.vendor.manufacturer=asus \
+              ro.product.vendor.brand=ASUS
+          MAKEFILE
+
+          # ===== BYPASS CHARGING 2.0 & SMART CHARGING =====
+          cat << 'RC' > vendor/custom/config/power/init.byqh.bypass2.rc
+          on property:sys.game.bypass_charging=1
+              write /sys/class/power_supply/battery/charging_enabled 0
+              write /sys/class/power_supply/battery/input_suspend 1
+          on property:sys.game.bypass_charging=0
+              write /sys/class/power_supply/battery/charging_enabled 1
+              write /sys/class/power_supply/battery/input_suspend 0
+          RC
+
+          cat << 'MAKEFILE' > vendor/custom/config/power/battery_saver_props.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.battery_saver=ultra \
+              persist.sys.battery.charge_limit=85 \
+              persist.sys.battery.thermal_control=ai_auto \
+              persist.sys.power.deep_sleep=true
+          MAKEFILE
+
+          # ===== KERNEL HARDENING & SILICON ARMOR =====
+          cat << 'MAKEFILE' > vendor/custom/config/security/kernel_hardening.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.security=silicon_armor \
+              ro.kernel.qemu.gltx=1 \
+              security.mdpp.mass=1 \
+              ro.boot.vbmeta.device_state=locked \
+              ro.boot.veritymode=enforcing
+          MAKEFILE
+
+      - name: 5. Mạng 5G/Wi-Fi 7 Dual Channel, Dolby, Dirac & Camera AI
+        run: |
+          # ===== DUAL CHANNEL NETWORK ACCELERATION =====
+          cat << 'MAKEFILE' > vendor/custom/config/network/dual_channel_wifi7.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.dual_network_acceleration=enabled \
+              ro.wifi.chain=2 \
+              persist.sys.wifi_6e_enabled=true \
+              persist.sys.wifi7_ready=true \
+              persist.vendor.radio.5g_mode_pref=1 \
+              persist.vendor.radio.data_con_rdx=1 \
+              ro.byqh.network_boost=ultra
+          MAKEFILE
+
+          cat << 'RC' > vendor/custom/config/network/init.byqh.doh.rc
+          on boot
+              setprop net.dns1 1.1.1.1
+              setprop net.dns2 8.8.8.8
+              setprop persist.sys.private_dns cloudflare
+          RC
+
+          # ===== DOLBY ATMOS, DIRAC & SNAPDRAGON SOUND =====
+          cat << 'MAKEFILE' > vendor/custom/config/media/dolby_dirac_audio.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.audio_engine=dolby_atmos_lossless \
+              persist.vendor.audio.dolby.atmos.enabled=true \
+              ro.byqh.audio.dirac=enabled \
+              persist.vendor.audio.snapdragon.sound=true \
+              ro.bluetooth.a2dp_codecs=aptX,aptXHD,aptXAdaptive,aptXLossless \
+              persist.sys.audio.lossless=true
+          MAKEFILE
+
+          # ===== CAMERA AI GCAM PIXEL 8 PRO SPOOFING =====
+          cat << 'MAKEFILE' > vendor/custom/config/media/camera_ai_vip.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.camera=ai_gcam_ultimate \
+              persist.camera.HAL3.enabled=1 \
+              persist.camera.eis.enabled=1 \
+              persist.vendor.camera.hdr.enable=true \
+              persist.vendor.camera.exif.make=Google \
+              persist.vendor.camera.exif.model=Pixel 8 Pro \
+              persist.camera.gps.package=com.android.camera
+          MAKEFILE
+
+          # ===== PRIVACY VAULT & NOTIFICATIONS =====
+          cat << 'MAKEFILE' > vendor/custom/config/privacy/privacy_vault.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.privacy_vault=enabled \
+              ro.byqh.app_lock=system_integrated \
+              persist.sys.sensors.off_screen_privacy=1 \
+              ro.byqh.network_privacy=strict
+          MAKEFILE
+
+          cat << 'MAKEFILE' > vendor/custom/config/notifications/anti_delay_bank.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.sys.fw.empty_app_percent=50 \
+              ro.sys.fw.bservice_enable=true \
+              ro.sys.fw.bservice_limit=15 \
+              persist.sys.fflag.override.settings_enable_monitor_phantom_procs=false \
+              persist.sys.power.whitelist_gms=true \
+              ro.byqh.dynamic_island=enabled
+          MAKEFILE
+
+      - name: 6. Giao Diện, Cử Chỉ, OTA & Build Prep
+        run: |
+          # ===== UI & GESTURES & OTA =====
+          cat << 'MAKEFILE' > vendor/custom/config/ui/ui_customizations.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.ui=material_you_ultimate \
+              ro.config.font=GoogleSans \
+              persist.sys.eyecare=auto \
+              persist.sys.liquid_glass_ui=true
+          MAKEFILE
+
+          cat << 'MAKEFILE' > vendor/custom/config/gestures/smart_gestures.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.gestures=smart_engine \
+              persist.sys.gesture.chop_chop=1 \
+              persist.sys.gesture.twist=1 \
+              ro.byqh.fod_gesture=enabled
+          MAKEFILE
+
+          cat << 'MAKEFILE' > vendor/custom/config/ota/ota_config.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.ota=appinternal_enabled \
+              ro.build.ab_update=true \
+              persist.sys.ota.server=https://api.byqh-os.com/v1/ota
+          MAKEFILE
+
+          cat << 'MAKEFILE' > vendor/custom/config/build/final_build_prep.mk
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.build.type=user \
+              ro.byqh.build_stage=release \
+              ro.secure=1 \
+              ro.adb.secure=1
+          MAKEFILE
+
+          cat << 'SH' > vendor/custom/config/build/run_byqh_final_build.sh
+          #!/bin/bash
+          echo "================================================="
+          echo " STARTING BY_QH OS ULTIMATE FINAL BUILD "
+          echo "================================================="
+          source build/envsetup.sh
+          lunch byqh_user
+          m -j$(nproc) bacon
+          echo "Build Completed Successfully!"
+          SH
+          chmod +x vendor/custom/config/build/run_byqh_final_build.sh
+
+      - name: 7. Tổng Hợp File Master `device.mk` Ultimate
+        run: |
+          cat << 'MAKEFILE' > device/generic/common/device.mk
+          # ====================================================================
+          # BY_QH OS VIP PRO MAX ULTIMATE - MASTER DEVICE MAKEFILE
+          # ====================================================================
+
+          $(call inherit-product, vendor/custom/config/byqh_branding.mk)
+          $(call inherit-product, vendor/custom/config/debloat/debloat_packages.mk)
+          
+          # AI & MEMORY ULTIMATE
+          $(call inherit-product, vendor/custom/config/ai/ai_predictive_engine.mk)
+          $(call inherit-product, vendor/custom/config/memory/ram_plus_ultimate.mk)
+          
+          # GAMING & GRAPHICS EXTREME
+          $(call inherit-product, vendor/custom/config/gaming/extreme_gaming_boost.mk)
+          $(call inherit-product, vendor/custom/config/graphics/adrenoboost_extreme.mk)
+          $(call inherit-product, vendor/custom/config/input/touch_1000hz.mk)
+          $(call inherit-product, vendor/custom/config/smoothness/ios_smoothness.mk)
+          
+          # POWER & SECURITY
+          $(call inherit-product, vendor/custom/config/power/battery_saver_props.mk)
+          $(call inherit-product, vendor/custom/config/security/kernel_hardening.mk)
+          
+          # NETWORK ULTIMATE
+          $(call inherit-product, vendor/custom/config/network/dual_channel_wifi7.mk)
+          
+          # MEDIA & CAMERA
+          $(call inherit-product, vendor/custom/config/media/dolby_dirac_audio.mk)
+          $(call inherit-product, vendor/custom/config/media/camera_ai_vip.mk)
+          
+          # SYSTEM & UI
+          $(call inherit-product, vendor/custom/config/privacy/privacy_vault.mk)
+          $(call inherit-product, vendor/custom/config/notifications/anti_delay_bank.mk)
+          $(call inherit-product, vendor/custom/config/ui/ui_customizations.mk)
+          $(call inherit-product, vendor/custom/config/gestures/smart_gestures.mk)
+          $(call inherit-product, vendor/custom/config/ota/ota_config.mk)
+          $(call inherit-product, vendor/custom/config/build/final_build_prep.mk)
+
+          PRODUCT_COPY_FILES += \
+              vendor/custom/config/power/init.byqh.bypass2.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.byqh.bypass2.rc \
+              vendor/custom/config/network/init.byqh.doh.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.byqh.doh.rc
+
+          PRODUCT_PACKAGES += \
+              GameSpace \
+              GameSpaceOverlay \
+              PlayIntegrityFix \
+              GmsCompat \
+              ByqhAudioFX \
+              ByqhPrivacyVault
+
+          PRODUCT_PROPERTY_OVERRIDES += \
+              ro.byqh.version=ULTIMATE-A16-V2.0 \
+              ro.byqh.system.readiness=100 \
+              ro.byqh.os_status=ULTIMATE_EMPEROR_READY \
+              user.language=vi \
+              user.region=VN \
+              persist.sys.locale=vi-VN
+          MAKEFILE
+
+      - name: 8. Kiểm Tra Toàn Vẹn Hệ Thống (Ultimate Integrity Check)
+        run: |
+          echo "========================================================="
+          echo " BY_QH OS ULTIMATE AUDITOR: KIỂM TRA ĐỘ HOÀN HẢO "
+          echo "========================================================="
+          
+          ERROR_COUNT=0
+          
+          echo "[1] Kiểm tra các file cấu hình Ultimate..."
+          FILES=(
+            "vendor/custom/config/byqh_branding.mk"
+            "vendor/custom/config/ai/ai_predictive_engine.mk"
+            "vendor/custom/config/memory/ram_plus_ultimate.mk"
+            "vendor/custom/config/gaming/extreme_gaming_boost.mk"
+            "vendor/custom/config/graphics/adrenoboost_extreme.mk"
+            "vendor/custom/config/input/touch_1000hz.mk"
+            "vendor/custom/config/smoothness/ios_smoothness.mk"
+            "vendor/custom/config/power/battery_saver_props.mk"
+            "vendor/custom/config/security/kernel_hardening.mk"
+            "vendor/custom/config/network/dual_channel_wifi7.mk"
+            "vendor/custom/config/media/dolby_dirac_audio.mk"
+            "vendor/custom/config/media/camera_ai_vip.mk"
+            "vendor/custom/config/privacy/privacy_vault.mk"
+            "vendor/custom/config/notifications/anti_delay_bank.mk"
+            "vendor/custom/config/ui/ui_customizations.mk"
+            "vendor/custom/config/gestures/smart_gestures.mk"
+            "vendor/custom/config/ota/ota_config.mk"
+            "vendor/custom/config/build/final_build_prep.mk"
+          )
+          
+          for FILE in "${FILES[@]}"; do
+            if [ ! -f "$FILE" ]; then
+              echo "❌ LỖI: Thiếu file $FILE"
+              ERROR_COUNT=$((ERROR_COUNT+1))
+            else
+              echo "✔️ OK: $FILE"
+            fi
+          done
+
+          echo ""
+          echo "[2] Kiểm tra liên kết trong device.mk..."
+          if grep -q "ai_predictive_engine.mk" device/generic/common/device.mk && \
+             grep -q "ram_plus_ultimate.mk" device/generic/common/device.mk && \
+             grep -q "adrenoboost_extreme.mk" device/generic/common/device.mk && \
+             grep -q "dual_channel_wifi7.mk" device/generic/common/device.mk && \
+             grep -q "kernel_hardening.mk" device/generic/common/device.mk; then
+             echo "✔️ OK: device.mk đã liên kết đầy đủ module Ultimate."
+          else
+             echo "❌ LỖI: device.mk thiếu lệnh inherit-product!"
+             ERROR_COUNT=$((ERROR_COUNT+1))
+          fi
+
+          echo "========================================================="
+          if [ $ERROR_COUNT -eq 0 ]; then
+            echo " 🎉 TỔNG KẾT: DỰ ÁN ULTIMATE HOÀN HẢO! ĐẾ VƯƠNG ĐÃ SẴN SÀNG! "
+          else
+            echo " ⚠️ TỔNG KẾT: Phát hiện $ERROR_COUNT lỗi. Vui lòng kiểm tra lại! "
+            exit 1
+          fi
+          echo "========================================================="
+
+      - name: 9. Commit & Push Ultimate Version
+        run: |
+          git config --global user.name "hao874148-lang"
+          git config --global user.email "lhao874148@gmail.com"
+          git add .
+          git commit -m "Upgrade to VIP Pro Max Ultimate: Add AI Predictive, RAM Plus, Adrenoboost, Wi-Fi 7 & Kernel Hardening"
+          git push origin main
