@@ -1,3 +1,11 @@
+PRODUCT_NAME := By_qh OS Ultimate
+PRODUCT_BRAND := By_qh
+PRODUCT_MANUFACTURER := By_qh Studio
+PRODUCT_MODEL := By_qh VIP Pro Max Ultimate
 PRODUCT_PROPERTY_OVERRIDES += \
+    ro.byqh.version=ULTIMATE-A16-V2.0 \
     ro.byqh.developer=hao874148-lang \
-    ro.build.display.id=By_qh OS Titanium 500K (Android 16)
+    ro.byqh.edition=By_qh-Emperor-Core \
+    ro.build.display.id=By_qh OS v2.0 Ultimate (Android 16) \
+    ro.product.brand=By_qh \
+    ro.product.model=By_qh Ultimate Phone

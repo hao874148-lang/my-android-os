@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="config_enable_dynamic_island">true</bool>
+    <bool name="config_dynamic_island_charging_animation">true</bool>
+    <bool name="config_dynamic_island_media_visualizer">true</bool>
+    <bool name="config_dynamic_island_bank_alerts">true</bool>
+    <bool name="config_dynamic_island_gamespace_fps">true</bool>
+    <dimen name="dynamic_island_corner_radius">32dp</dimen>
+    <dimen name="dynamic_island_height_min">38dp</dimen>
+    <dimen name="dynamic_island_height_max">200dp</dimen>
+</resources>

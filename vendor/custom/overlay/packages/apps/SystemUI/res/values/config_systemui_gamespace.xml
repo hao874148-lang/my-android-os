@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quick_settings_tiles_default" translatable="false">wifi,cell,bt,dnd,gamespace,fps_counter,performance_mode,bypass_charge,screenrecord,flashlight,rotation,ai_turbo</string>
+    <bool name="config_game_touch_boost_enabled">true</bool>
+    <string name="status_bar_network_name" translatable="false">By_qh Ultimate</string>
+</resources>

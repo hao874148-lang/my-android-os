@@ -1,0 +1,15 @@
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.byqh.extreme_gaming=enabled \
+    persist.vendor.qti.games.gt.enable=true \
+    vendor.perf.gesture.status=1 \
+    debug.sf.latch_unsignaled=1 \
+    debug.sf.enable_gl_backpressure=0 \
+    debug.egl.hw=1 \
+    debug.performance.tuning=1 \
+    ro.sys.fw.use_trim_settings=true \
+    persist.sys.performance.level=max \
+    ro.byqh.game_unlocker=enabled \
+    persist.vendor.game.unlock_fps=144 \
+    ro.product.vendor.model=ASUS_AI2401 \
+    ro.product.vendor.manufacturer=asus \
+    ro.product.vendor.brand=ASUS

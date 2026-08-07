@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="config_hasPlayIntegritySpoof">true</bool>
+    <bool name="config_spoofGoogleClient">true</bool>
+    <bool name="config_avoidGmsReprovisioning">true</bool>
+    <string name="config_gms_process_name" translatable="false">com.google.android.gms</string>
+    <string name="config_gms_unstable_process_name" translatable="false">com.google.android.gms.unstable</string>
+</resources>

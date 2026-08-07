@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="config_support_dc_dimming">true</bool>
+    <bool name="config_support_true_tone">true</bool>
+    <bool name="config_support_hdr10plus">true</bool>
+    <bool name="config_support_dolby_vision">true</bool>
+    <integer name="config_defaultRefreshRate">144</integer>
+    <integer name="config_peakRefreshRate">165</integer>
+    <bool name="config_user_refresh_rate_toggle">true</bool>
+</resources>

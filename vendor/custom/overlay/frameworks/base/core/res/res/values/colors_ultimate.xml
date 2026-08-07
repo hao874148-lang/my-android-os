@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_dark">#020305</color>
+    <color name="accent_device_default_dark">#00FFAA</color>
+    <color name="accent_device_default_light">#00E5FF</color>
+    <color name="background_floating_material_dark">#08090C</color>
+    <color name="system_neutral1_900">#000000</color>
+    <color name="liquid_glass_bg">#1AFFFFFF</color>
+    <color name="dynamic_island_bg_color">#F0000000</color>
+</resources>
