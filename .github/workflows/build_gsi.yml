@@ -17,27 +17,27 @@ jobs:
           remove-android: 'true'
           remove-haskell: 'true'
 
-      - name: 2. Cài đặt công cụ đóng gói GSI
+      - name: 2. Cài đặt công cụ
         run: |
           sudo apt update
-          sudo apt install -y git wget p7zip-full zip unace unrar unzip p7zip-rar aria2
+          sudo apt install -y wget xz-utils zip
 
-      - name: 3. Tải nguồn LineageOS GSI & Tối ưu cho Helio G80
+      - name: 3. Tải GSI LineageOS 20 (Android 13 - AndyYan)
         run: |
           mkdir -p output
           cd output
-          # Tải bản GSI LineageOS 20 (Android 13 - arm64_bgS)
-          aria2c -x16 -s16 "https://github.com/phhusson/treble_experimentations/releases/download/v416/lineage-19.1-20221101-UNOFFICIAL-arm64-bgS.img.xz" -o gsi_base.img.xz
-          unxz gsi_base.img.xz
-          mv gsi_base.img system.img
+          # Tải bản GSI LineageOS 20 arm64-bvS chuẩn
+          wget -O gsi_base.img.xz "https://github.com/AndyYan/LineageOS_GSI/releases/download/lineage-20-20240315/lineage-20.0-20240315-UNOFFICIAL-arm64-bvS.img.xz"
+          xz -d gsi_base.img.xz
+          mv lineage-20.0-20240315-UNOFFICIAL-arm64-bvS.img system.img
 
       - name: 4. Nén thành file ROM cài đặt (.zip)
         run: |
           cd output
           zip -r9 LineageOS_20_GSI_Samsung_A32.zip system.img
 
-      - name: 5. Xuất file ROM (.zip) lên GitHub Artifacts
+      - name: 5. Xuất file ROM lên GitHub Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: LineageOS_ROM_Samsung_A32
+          name: LineageOS_20_ROM_Samsung_A32
           path: output/LineageOS_20_GSI_Samsung_A32.zip
