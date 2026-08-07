@@ -1,4 +1,3 @@
-
 name: Build LineageOS GSI ROM for Samsung A32
 
 on:
@@ -23,23 +22,25 @@ jobs:
           sudo apt update
           sudo apt install -y wget xz-utils zip curl jq
 
-      - name: 3. Tải GSI LineageOS (Tự động lấy link từ SourceForge)
+      - name: 3. Tải GSI LineageOS (Cơ chế tự tìm & dự phòng an toàn)
         run: |
           mkdir -p output
           cd output
           
           echo "=== Đang quét SourceForge để tìm bản GSI arm64_bvS mới nhất ==="
-          # Quét trang chủ SourceForge của AndyYan để lấy link tải file
-          SF_PAGE=$(curl -s https://sourceforge.net/projects/andyyan-gsi/files/lineage-21.0/)
+          # Quét trang SourceForge
+          SF_PAGE=$(curl -s -L https://sourceforge.net/projects/andyyan-gsi/files/lineage-21.0/)
           
-          # Lọc lấy đường dẫn trực tiếp có chứa đuôi arm64_bvS.img.xz
-          DOWNLOAD_URL=$(echo "$SF_PAGE" | grep -o 'https://sourceforge.net/projects/andyyan-gsi/files/lineage-21.0/[^"]*arm64_bvS.img.xz/download' | head -n 1)
+          # Lọc lấy đường dẫn tương đối (link trong HTML SourceForge thường là dạng /projects/...)
+          REL_URL=$(echo "$SF_PAGE" | grep -o '/projects/andyyan-gsi/files/lineage-21.0/[^"]*arm64_bvS.img.xz/download' | head -n 1)
           
-          # Kiểm tra an toàn
-          if [ -z "$DOWNLOAD_URL" ]; then
-            echo "❌ LỖI: Không tìm thấy link tải GSI arm64_bvS trên SourceForge."
-            echo "Có thể tác giả chưa up bản mới, hoặc cấu trúc trang đã đổi."
-            exit 1
+          if [ -n "$REL_URL" ]; then
+            DOWNLOAD_URL="https://sourceforge.net${REL_URL}"
+            echo "=== Đã quét thành công link động ==="
+          else
+            echo "⚠️ Cảnh báo: Không quét được link động. Chuyển sang dùng link dự phòng trực tiếp."
+            # Link dự phòng vững chắc nhất (bản ổn định gần nhất)
+            DOWNLOAD_URL="https://sourceforge.net/projects/andyyan-gsi/files/lineage-21.0/lineage-21.0-20231115-UNOFFICIAL-treble_arm64_bvS.img.xz/download"
           fi
           
           echo "=== Đang tải từ link: $DOWNLOAD_URL ==="
