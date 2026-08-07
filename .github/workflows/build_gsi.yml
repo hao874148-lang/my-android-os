@@ -23,26 +23,27 @@ jobs:
           sudo apt update
           sudo apt install -y wget xz-utils zip curl jq
 
-      - name: 3. Tải GSI LineageOS (Tự động lấy link mới nhất)
+      - name: 3. Tải GSI LineageOS (Tự động lấy link từ SourceForge)
         run: |
           mkdir -p output
           cd output
           
-          # Gọi API GitHub để lấy danh sách release
-          API_JSON=$(curl -s https://api.github.com/repos/AndyYan/LineageOS_GSI/releases)
+          echo "=== Đang quét SourceForge để tìm bản GSI arm64_bvS mới nhất ==="
+          # Quét trang chủ SourceForge của AndyYan để lấy link tải file
+          SF_PAGE=$(curl -s https://sourceforge.net/projects/andyyan-gsi/files/lineage-21.0/)
           
-          # Lọc lấy link tải xuống (dùng .[0] để lấy bản mới nhất, grep 'arm64_bvS.img.xz' để lấy đúng file)
-          DOWNLOAD_URL=$(echo "$API_JSON" | jq -r 'if type == "array" then .[0].assets[].browser_download_url else empty end' | grep 'arm64_bvS.img.xz' | head -n 1)
+          # Lọc lấy đường dẫn trực tiếp có chứa đuôi arm64_bvS.img.xz
+          DOWNLOAD_URL=$(echo "$SF_PAGE" | grep -o 'https://sourceforge.net/projects/andyyan-gsi/files/lineage-21.0/[^"]*arm64_bvS.img.xz/download' | head -n 1)
           
-          # Kiểm tra nếu không tìm thấy link (tránh lỗi host name rỗng)
+          # Kiểm tra an toàn
           if [ -z "$DOWNLOAD_URL" ]; then
-            echo "❌ LỖI: Không tìm thấy link tải GSI. Có thể do GitHub giới hạn API (Rate limit) hoặc tên file đã đổi."
-            echo "Nội dung API trả về:"
-            echo "$API_JSON" | head -n 20
+            echo "❌ LỖI: Không tìm thấy link tải GSI arm64_bvS trên SourceForge."
+            echo "Có thể tác giả chưa up bản mới, hoặc cấu trúc trang đã đổi."
             exit 1
           fi
           
           echo "=== Đang tải từ link: $DOWNLOAD_URL ==="
+          # Tải file (wget tự động theo dõi redirect của SourceForge)
           wget -O gsi_base.img.xz "$DOWNLOAD_URL"
           
           echo "=== Giải nén file ==="
