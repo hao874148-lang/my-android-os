@@ -1,0 +1,28 @@
+name: Day 31 - Real Device Bring-Up Init
+
+on:
+  workflow_dispatch:
+
+jobs:
+  device-bringup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        run: |
+          sudo apt-get update && sudo apt-get install -y git python3 curl
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+
+      - name: Parse Device Tree & Validate Manifest
+        run: |
+          git config --global user.name "hao874148-lang"
+          git config --global user.email "lhao874148@gmail.com"
+          mkdir -p ~/android-source && cd ~/android-source
+          ~/bin/repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --depth=1
+
+          echo "=== KÍCH HOẠT TIẾN TRÌNH THÁNG 2: BRING-UP PHẦN CỨNG ==="
+          ls -la .repo/local_manifests/
