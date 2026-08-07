@@ -478,5 +478,5 @@ jobs:
           git config --global user.name "hao874148-lang"
           git config --global user.email "lhao874148@gmail.com"
           git add .
-          git commit -m "Upgrade to VIP Pro Max Ultimate: Add AI Predictive, RAM Plus, Adrenoboost, Wi-Fi 7 & Kernel Hardening"
-          git push origin main
+          git commit -m "Upgrade to VIP Pro Max Ultimate: Add AI Predictive, RAM Plus, Adrenoboost, Wi-Fi 7 & Kernel Hardening" || true
+          git push origin main || true
