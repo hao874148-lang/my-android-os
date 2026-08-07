@@ -20,24 +20,27 @@ jobs:
       - name: 2. Cài đặt công cụ
         run: |
           sudo apt update
-          sudo apt install -y wget xz-utils zip
+          sudo apt install -y wget xz-utils zip curl jq
 
-      - name: 3. Tải GSI LineageOS 20 (Android 13 - AndyYan)
+      - name: 3. Tải GSI LineageOS (Tự động lấy link mới nhất)
         run: |
           mkdir -p output
           cd output
-          # Tải bản GSI LineageOS 20 arm64-bvS chuẩn
-          wget -O gsi_base.img.xz "https://github.com/AndyYan/LineageOS_GSI/releases/download/lineage-20-20240315/lineage-20.0-20240315-UNOFFICIAL-arm64-bvS.img.xz"
+          # Tự động quét API GitHub để lấy link tải bản GSI arm64 mới nhất
+          DOWNLOAD_URL=$(curl -s https://api.github.com/repos/AndyYan/LineageOS_GSI/releases | jq -r '.[].assets[].browser_download_url' | grep -i 'arm64-bvS' | head -n 1)
+          echo "Đang tải từ link: $DOWNLOAD_URL"
+          
+          wget -O gsi_base.img.xz "$DOWNLOAD_URL"
           xz -d gsi_base.img.xz
-          mv lineage-20.0-20240315-UNOFFICIAL-arm64-bvS.img system.img
+          mv *.img system.img
 
       - name: 4. Nén thành file ROM cài đặt (.zip)
         run: |
           cd output
-          zip -r9 LineageOS_20_GSI_Samsung_A32.zip system.img
+          zip -r9 LineageOS_GSI_Samsung_A32.zip system.img
 
       - name: 5. Xuất file ROM lên GitHub Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: LineageOS_20_ROM_Samsung_A32
-          path: output/LineageOS_20_GSI_Samsung_A32.zip
+          name: LineageOS_ROM_Samsung_A32
+          path: output/LineageOS_GSI_Samsung_A32.zip
